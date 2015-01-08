@@ -1,0 +1,27 @@
+how to deal with NPC dialogue
+player.interact
+player.movements
+how to make engine draw world
+
+npc and player animations
+
+create world
+
+engine also has to deal with animations when transitioning through contexts
+
+animation engine created above even the text engine which is above all other engines and inputs?
+decide game screen size, tile size, world sizes
+
+entities player and npc must be drawn using depth testing
+
+add particle effects at the end
+dialogue needs to be uploaded via txt
+
+engine.addNPC
+engine.addentity
+NPC options - have EVERY npc in appdelegate. OR have them reinit'd per level
+store npc's in World.h - vector
+
+trimming off the little pixels around characters that cause problems - alphas of pixels will be rendered as long as alpha > 0.0
+
+the process of entering 'solids' for worlds should be read in through flaremap, or another document, not hardcoded
