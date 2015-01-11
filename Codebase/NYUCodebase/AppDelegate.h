@@ -158,15 +158,17 @@ void AppDelegate::UpdateLevel1(float elapsed){
 	if (keys[SDL_SCANCODE_UP]) {
 		e->moveUp();
 	}
-	if (keys[SDL_SCANCODE_DOWN]) {
+	else if (keys[SDL_SCANCODE_DOWN]) {
 		e->moveDown();
 	}
-	if (keys[SDL_SCANCODE_LEFT]) {
+	else if (keys[SDL_SCANCODE_LEFT]) {
 		e->moveLeft();
 	}
-	if (keys[SDL_SCANCODE_RIGHT]) {
+	else if (keys[SDL_SCANCODE_RIGHT]) {
 		e->moveRight();
+	} 
+	else {
+		e->noMove();
 	}
-
 	e->Update(elapsed);
 }

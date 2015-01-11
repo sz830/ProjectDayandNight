@@ -53,13 +53,22 @@ public:
 	int facing; // 0=north 1=east 2=south 3=west
 	bool interacting=false;
 	GLuint textureID;
-	float animationTime = 0.f;
+	float movementTime = 0.f;
 
 	//RenderingInformation
 	float width=TILE_SIZE;
 	float height=1.33*TILE_SIZE;
 	int spriteCountX = 12;
 	int spriteCountY = 8;
+
+	//Rendering Animation Information
+	float animationElapsed = 0.0;
+	int animationIndex = 0;
+	int lastFacing = -1; // direction player was last facing - read from input
+	float fps = 7.0; // animation frames per second
+	bool movementInput = false; // whether or not 
+
+	void updateAnimationInfo(int facing, float elapsed);
 
 	void Draw();
 	void DrawSpriteSheetSprite(int index);
@@ -75,58 +84,26 @@ Player::Player(int gridX, int gridY, GLuint textureID, const char *name){
 	Player::facing = 2;
 }
 Player::Player(){}
-
 void Player::Draw()
 {
-	float completionTime = TILE_SIZE / speed;
-	float completionPercent = animationTime / completionTime;
-	int index = 0;
-	if (!moving){
-			 if (facing == 0) { DrawSpriteSheetSprite(upPlayerStanding); } //NORTH
+	if (!moving && movementInput==false){
+		if (facing == 0) {DrawSpriteSheetSprite(upPlayerStanding); } //NORTH
 		else if (facing == 1) { DrawSpriteSheetSprite(rightPlayerStanding); } //EAST
 		else if (facing == 2) { DrawSpriteSheetSprite(downPlayerStanding); } //SOUTH
 		else if (facing == 3) { DrawSpriteSheetSprite(leftPlayerStanding); } //WEST
 	}
 	else {
 		if (facing == 0){//NORTH
-			float interval = completionTime / upPlayerAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(upPlayerAnimation[index%upPlayerAnimation.size()]);
-					break;
-				}
-				index++;
-			}
+			DrawSpriteSheetSprite(upPlayerAnimation[animationIndex%upPlayerAnimation.size()]);
 		}
-		else if (facing == 1) {//EAST
-			float interval = completionTime / rightPlayerAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(rightPlayerAnimation[index%rightPlayerAnimation.size()]);
-					break;
-				}
-				index++;
-			}
+		else if (facing == 1){//EAST
+			DrawSpriteSheetSprite(rightPlayerAnimation[animationIndex%rightPlayerAnimation.size()]);
 		}
-		else if (facing == 2) {//SOUTH
-			float interval = completionTime / downPlayerAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(downPlayerAnimation[index%downPlayerAnimation.size()]);
-					break;
-				}
-				index++;
-			}
+		else if (facing == 2){//SOUTH
+			DrawSpriteSheetSprite(downPlayerAnimation[animationIndex%downPlayerAnimation.size()]);
 		}
-		else if (facing == 3) {//WEST
-			float interval = completionTime / leftPlayerAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(leftPlayerAnimation[index%leftPlayerAnimation.size()]);
-					break;
-				}
-				index++;
-			}
+		else if (facing == 3){//WEST
+			DrawSpriteSheetSprite(leftPlayerAnimation[animationIndex%leftPlayerAnimation.size()]);
 		}
 	}
 }
@@ -176,4 +153,19 @@ void Player::DrawSpriteSheetSprite(int index) {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_ALPHA_TEST);
 	glPopMatrix();
+}
+
+void Player::updateAnimationInfo(int facing, float elapsed){
+	if (facing == lastFacing){
+		animationElapsed += elapsed;
+		if (animationElapsed > 1.0 / fps) {
+			animationIndex++;
+			animationElapsed = 0.0;
+		}
+	}
+	else {
+		lastFacing = facing;
+		animationElapsed =0.0;
+		animationIndex = 0;
+	}
 }

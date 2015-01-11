@@ -26,6 +26,7 @@ public:
 	void moveDown();
 	void moveLeft();
 	void moveRight();
+	void noMove();
 	bool isCollision(int gridX, int gridY);
 
 	void Update(float elapsed);
@@ -119,6 +120,7 @@ void Engine::RenderWorld(){
 }
 
 void Engine::moveUp(){
+	player->movementInput = true;
 	if(!player->moving){
 		player->facing = 0;//NORTH
 		//Check that the grid block to the north is collision free 
@@ -133,6 +135,7 @@ void Engine::moveUp(){
 	}
 }
 void Engine::moveDown(){
+	player->movementInput = true;
 	if (!player->moving){
 		player->facing = 2;//SOUTH
 		//Check that the grid block to the south is collision free 
@@ -147,6 +150,7 @@ void Engine::moveDown(){
 	}
 }
 void Engine::moveLeft(){
+	player->movementInput = true;
 	if (!player->moving){
 		player->facing = 3;//WEST
 		//Check that the grid block to the west is collision free 
@@ -161,6 +165,7 @@ void Engine::moveLeft(){
 	}
 }
 void Engine::moveRight(){
+	player->movementInput = true;
 	if (!player->moving){
 		player->facing = 1;//EAST
 		//Check that the grid block to the east is collision free 
@@ -174,7 +179,14 @@ void Engine::moveRight(){
 		}
 	}
 }
-
+void Engine::noMove(){
+	if (!player->moving)
+	{
+		player->movementInput = false;
+		player->animationElapsed = 0.0;
+		player->animationIndex = 0;
+	}
+}
 bool Engine::isCollision(int gridX, int gridY){
 	if (gridY >= 0 && gridY < world->mapHeight && gridX >= 0 && gridX<world->mapWidth){ //Check if coordinates are out of bounds
 		for (int i = 0; i < world->solids.size(); i++){ // check map if new destination is a collision tile
@@ -221,17 +233,19 @@ void Engine::UpdatePlayer(float elapsed){
 	if (player->moving){
 		player->position->x += player->velocity->x*elapsed;
 		player->position->y += player->velocity->y*elapsed;
-		player->animationTime += elapsed;
+		player->movementTime += elapsed;
+		player->updateAnimationInfo(player->facing, elapsed);
 	}
-	//Player reaches destination when animationTime > distance/velocity ; aka, we know how much time it takes him to travel one grid location
-	if (player->animationTime >= TILE_SIZE / player->speed){ 
+	//Player reaches destination when movementTime > distance/velocity ; aka, we know how much time it takes him to travel one grid location
+	if (player->movementTime >= TILE_SIZE / player->speed){
 		int gridX = player->destination->x;
 		int gridY = player->destination->y;
-		player->animationTime = 0;
+		player->movementTime = 0;
 		player->moving = false;
 		player->position = new Vector(gridToXLeft(gridX, gridY) + TILE_SIZE / 2.f, gridToYTop(gridX, gridY) - TILE_SIZE / 2.f, 0.0);
 		player->velocity = new Vector(0, 0, 0);
 	}
+	
 }
 
 void Engine::UpdateNPCs(float elapsed){
@@ -240,6 +254,7 @@ void Engine::UpdateNPCs(float elapsed){
 		if (!npc->moving){
 			int prob = rand() % 1000;
 			if (prob < 5){ //1% chance npc begins to move when not moving
+				npc->movementInput = true;
 				int dir = (rand() % 4);
 				npc->facing = dir;
 				//Check that the grid block to the north is collision free 
@@ -272,17 +287,24 @@ void Engine::UpdateNPCs(float elapsed){
 					npc->destination->x = x;
 				}
 			}
+			else { // engine has decided NPC will not move
+				npc->movementInput = false;
+				npc->movementInput = false;
+				npc->animationElapsed = 0.0;
+				npc->animationIndex = 0;
+			}
 		}
 		else {
 			npc->position->x += npc->velocity->x*elapsed;
 			npc->position->y += npc->velocity->y*elapsed;
-			npc->animationTime += elapsed;
+			npc->movementTime += elapsed;
+			npc->updateAnimationInfo(npc->facing, elapsed);
 
-			//npc reaches destination when animationTime > distance/velocity ; aka, we know how much time it takes him to travel one grid location
-			if (npc->animationTime >= TILE_SIZE / npc->speed){
+			//npc reaches destination when movementTime > distance/velocity ; aka, we know how much time it takes him to travel one grid location
+			if (npc->movementTime >= TILE_SIZE / npc->speed){
 				int gridX = npc->destination->x;
 				int gridY = npc->destination->y;
-				npc->animationTime = 0;
+				npc->movementTime = 0;
 				npc->moving = false;
 				npc->position = new Vector(gridToXLeft(gridX, gridY) + TILE_SIZE / 2.f, gridToYTop(gridX, gridY) - TILE_SIZE / 2.f, 0.0);
 				npc->velocity = new Vector(0, 0, 0);

@@ -1,31 +1,30 @@
-﻿Build started 1/8/2015 6:18:36 AM.
+﻿Build started 1/11/2015 1:56:03 AM.
      1>Project "C:\Users\Simon\Desktop\TheGame\NYUCodebase\NYUCodebase.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\SDL2\include /IC:\SDL2_image\include /IC:\SDL2_mixer\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
          main.cpp
      1>c:\users\simon\desktop\thegame\nyucodebase\main.cpp(5): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
      1>c:\users\simon\desktop\thegame\nyucodebase\player.h(60): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\player.h(71): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\npc.h(64): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>c:\users\simon\desktop\thegame\nyucodebase\player.h(80): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
      1>c:\users\simon\desktop\thegame\nyucodebase\npc.h(74): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\npc.h(86): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(55): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(62): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(131): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(145): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(159): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(173): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(180): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(185): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(187): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(195): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(228): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(229): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(238): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(271): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(272): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(283): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(284): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\npc.h(95): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(56): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(63): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(133): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(148): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(163): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(178): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(192): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(197): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(199): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(207): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(241): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(242): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(252): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(286): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(287): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(305): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\simon\desktop\thegame\nyucodebase\engine.h(306): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
      1>c:\users\simon\desktop\thegame\nyucodebase\main.cpp(114): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Simon\Desktop\TheGame\Debug\NYUCodebase.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\SDL2_mixer\lib\x86 /LIBPATH:C:\SDL2\lib\x86 /LIBPATH:C:\SDL2_image\lib\x86 SDL2.lib SDL2main.lib SDL2_image.lib OpenGL32.lib SDL2_mixer.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Simon\Desktop\TheGame\Debug\NYUCodebase.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Simon\Desktop\TheGame\Debug\NYUCodebase.lib" /MACHINE:X86 Debug\main.obj
@@ -34,4 +33,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.00
+Time Elapsed 00:00:02.49

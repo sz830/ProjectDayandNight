@@ -61,12 +61,12 @@ public:
 	Vector*position;
 	Vector*velocity;
 	Vector*destination;
-	float speed = .4;
+	float speed = .5;
 	bool moving = false;
 	int facing; // 0=north 1=east 2=south 3=west
 	bool interacting = false;
 	GLuint textureID;
-	float animationTime = 0.f;
+	float movementTime = 0.f;
 	//Dialogue Data Structure
 
 	//RenderingInformation
@@ -74,6 +74,15 @@ public:
 	float height = 1.33*TILE_SIZE;
 	int spriteCountX = 12;
 	int spriteCountY = 8;
+
+	//Rendering Animation Information
+	float animationElapsed = 0.0;
+	int animationIndex = 0;
+	int lastFacing = -1; // direction player was last facing - read from input
+	float fps = 7.0; // animation frames per second
+	bool movementInput = false; // whether or not 
+
+	void updateAnimationInfo(int facing, float elapsed);
 
 	void Draw();
 	void DrawSpriteSheetSprite(int index);
@@ -92,10 +101,7 @@ NPC::NPC(int gridX, int gridY, GLuint textureID, const char *name){
 
 void NPC::Draw()//Not ready yet because player is still moving too fast
 {
-	float completionTime = TILE_SIZE / speed;
-	float completionPercent = animationTime / completionTime;
-	int index = 0;
-	if (!moving){
+	if (!moving && movementInput == false){
 		if (facing == 0) { DrawSpriteSheetSprite(upNPCStanding); } //NORTH
 		else if (facing == 1) { DrawSpriteSheetSprite(rightNPCStanding); } //EAST
 		else if (facing == 2) { DrawSpriteSheetSprite(downNPCStanding); } //SOUTH
@@ -103,44 +109,16 @@ void NPC::Draw()//Not ready yet because player is still moving too fast
 	}
 	else {
 		if (facing == 0){//NORTH
-			float interval = completionTime / upNPCAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(upNPCAnimation[index%upNPCAnimation.size()]);
-					break;
-				}
-				index++;
-			}
+			DrawSpriteSheetSprite(upNPCAnimation[animationIndex%upNPCAnimation.size()]);
 		}
-		else if (facing == 1) {//EAST
-			float interval = completionTime / rightNPCAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(rightNPCAnimation[index%rightNPCAnimation.size()]);
-					break;
-				}
-				index++;
-			}
+		else if (facing == 1){//EAST
+			DrawSpriteSheetSprite(rightNPCAnimation[animationIndex%rightNPCAnimation.size()]);
 		}
-		else if (facing == 2) {//SOUTH
-			float interval = completionTime / downNPCAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(downNPCAnimation[index%downNPCAnimation.size()]);
-					break;
-				}
-				index++;
-			}
+		else if (facing == 2){//SOUTH
+			DrawSpriteSheetSprite(downNPCAnimation[animationIndex%downNPCAnimation.size()]);
 		}
-		else if (facing == 3) {//WEST
-			float interval = completionTime / leftNPCAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(leftNPCAnimation[index%leftNPCAnimation.size()]);
-					break;
-				}
-				index++;
-			}
+		else if (facing == 3){//WEST
+			DrawSpriteSheetSprite(leftNPCAnimation[animationIndex%leftNPCAnimation.size()]);
 		}
 	}
 }
@@ -190,4 +168,19 @@ void NPC::DrawSpriteSheetSprite(int index) {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_ALPHA_TEST);
 	glPopMatrix();
+}
+
+void NPC::updateAnimationInfo(int facing, float elapsed){
+	if (facing == lastFacing){
+		animationElapsed += elapsed;
+		if (animationElapsed > 1.0 / fps) {
+			animationIndex++;
+			animationElapsed = 0.0;
+		}
+	}
+	else {
+		lastFacing = facing;
+		animationElapsed = 0.0;
+		animationIndex = 0;
+	}
 }
