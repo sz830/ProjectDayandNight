@@ -21,9 +21,6 @@ public:
 
 	void Render();
 	void RenderWorld();
-
-	void moveUp();
-	void moveDown();
 	void moveLeft();
 	void moveRight();
 	bool isCollision(int gridX, int gridY);
@@ -116,35 +113,6 @@ void Engine::RenderWorld(){
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisable(GL_BLEND);
 	glPopMatrix();
-}
-
-void Engine::moveUp(){
-	if(!player->moving){
-		player->facing = 0;//NORTH
-		//Check that the grid block to the north is collision free 
-		int y = (int)player->destination->y - 1;
-		int x = (int)player->destination->x;
-		bool collision = isCollision(x, y);
-		if (!collision){
-			player->moving = true;
-			player->velocity->y = player->speed;
-			player->destination->y = y;
-		}
-	}
-}
-void Engine::moveDown(){
-	if (!player->moving){
-		player->facing = 2;//SOUTH
-		//Check that the grid block to the south is collision free 
-		int y = (int)player->destination->y + 1;
-		int x = (int)player->destination->x;
-		bool collision = isCollision(x, y);
-		if (!collision){
-			player->moving = true;
-			player->velocity->y = -player->speed;
-			player->destination->y = y;
-		}
-	}
 }
 void Engine::moveLeft(){
 	if (!player->moving){

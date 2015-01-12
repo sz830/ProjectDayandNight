@@ -155,12 +155,6 @@ void AppDelegate::UpdateLevel1(float elapsed){
 		}
 	}
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
-	if (keys[SDL_SCANCODE_UP]) {
-		e->moveUp();
-	}
-	if (keys[SDL_SCANCODE_DOWN]) {
-		e->moveDown();
-	}
 	if (keys[SDL_SCANCODE_LEFT]) {
 		e->moveLeft();
 	}
