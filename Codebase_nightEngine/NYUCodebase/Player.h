@@ -29,9 +29,7 @@ Dialogue dialogue;
 using namespace std;
 
 //Animation Information
-vector<int> upPlayerAnimation = { 0, 1, 2, 1 };
 vector<int> rightPlayerAnimation = { 12, 13, 14, 13 };
-vector<int> downPlayerAnimation = { 24, 25, 26, 25 };
 vector<int> leftPlayerAnimation = { 36, 37, 38, 37 };
 int rightPlayerStanding = 13;
 int leftPlayerStanding = 37;
@@ -79,25 +77,25 @@ void Player::Draw()
 	float completionTime = TILE_SIZE / speed;
 	int index = 0;
 	if (!moving){
-			 if (facing == 3) { DrawSpriteSheetSprite(leftPlayerStanding); } //LEFT
+			 if (facing == 0) { DrawSpriteSheetSprite(leftPlayerStanding); } //LEFT
 		else if (facing == 1) { DrawSpriteSheetSprite(rightPlayerStanding); } //RIGHT
 	}
 	else {
-		if (facing == 3) {//LEFT
-			float interval = completionTime / leftPlayerAnimation.size();
+		if (facing == 1) {//RIGHT
+			float interval = completionTime / rightPlayerAnimation.size();
 			for (float i = interval; i <= completionTime; i += interval){
 				if (animationTime < i){
-					DrawSpriteSheetSprite(leftPlayerAnimation[index%leftPlayerAnimation.size()]);
+					DrawSpriteSheetSprite(rightPlayerAnimation[index%rightPlayerAnimation.size()]);
 					break;
 				}
 				index++;
 			}
 		}
-		else if (facing == 1) {//RIGHT
-			float interval = completionTime / rightPlayerAnimation.size();
+		else if (facing == 0) {//LEFT
+			float interval = completionTime / leftPlayerAnimation.size();
 			for (float i = interval; i <= completionTime; i += interval){
 				if (animationTime < i){
-					DrawSpriteSheetSprite(rightPlayerAnimation[index%rightPlayerAnimation.size()]);
+					DrawSpriteSheetSprite(leftPlayerAnimation[index%leftPlayerAnimation.size()]);
 					break;
 				}
 				index++;

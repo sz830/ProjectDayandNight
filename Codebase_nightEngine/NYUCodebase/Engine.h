@@ -116,7 +116,7 @@ void Engine::RenderWorld(){
 }
 void Engine::moveLeft(){
 	if (!player->moving){
-		player->facing = 3;//WEST
+		player->facing = 0;//WEST
 		//Check that the grid block to the west is collision free 
 		int y = (int)player->destination->y;
 		int x = (int)player->destination->x-1;
@@ -203,7 +203,8 @@ void Engine::UpdatePlayer(float elapsed){
 }
 
 void Engine::UpdateNPCs(float elapsed){
-	for (int i = 0; i < NPCs.size(); i++){
+	//Commented out to make the NPCs immobile for now
+/*	for (int i = 0; i < NPCs.size(); i++){
 		NPC * npc = NPCs[i];
 		if (!npc->moving){
 			int prob = rand() % 1000;
@@ -256,7 +257,7 @@ void Engine::UpdateNPCs(float elapsed){
 				npc->velocity = new Vector(0, 0, 0);
 			}
 		}
-	}
+	}*/
 }
 
 void Engine::addNPC(NPC* npc){

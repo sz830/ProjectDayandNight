@@ -41,13 +41,9 @@ npc.update(float elapsed) //If Moving, continue in direction or finish moving(in
 using namespace std;
 
 //Animation Information
-vector<int> upNPCAnimation = { 9, 10, 11, 10 };
 vector<int> rightNPCAnimation = { 21, 22, 23, 22 };
-vector<int> downNPCAnimation = { 33, 34, 35, 34 };
 vector<int> leftNPCAnimation = { 45, 46, 47, 46 };
-int upNPCStanding = 10;
 int rightNPCStanding = 22;
-int downNPCStanding = 34;
 int leftNPCStanding = 46;
 
 
@@ -87,7 +83,7 @@ NPC::NPC(int gridX, int gridY, GLuint textureID, const char *name){
 	NPC::position = new Vector(gridToXLeft(gridX, gridY) + TILE_SIZE / 2.f, gridToYTop(gridX, gridY) - TILE_SIZE / 2.f, 0.0);
 	NPC::velocity = new Vector(0, 0, 0);
 	NPC::textureID = textureID;
-	NPC::facing = 2;
+	NPC::facing = 0;
 }
 
 void NPC::Draw()//Not ready yet because player is still moving too fast
@@ -96,17 +92,15 @@ void NPC::Draw()//Not ready yet because player is still moving too fast
 	float completionPercent = animationTime / completionTime;
 	int index = 0;
 	if (!moving){
-		if (facing == 0) { DrawSpriteSheetSprite(upNPCStanding); } //NORTH
+		if (facing == 0) { DrawSpriteSheetSprite(leftNPCStanding); } //WEST
 		else if (facing == 1) { DrawSpriteSheetSprite(rightNPCStanding); } //EAST
-		else if (facing == 2) { DrawSpriteSheetSprite(downNPCStanding); } //SOUTH
-		else if (facing == 3) { DrawSpriteSheetSprite(leftNPCStanding); } //WEST
 	}
 	else {
-		if (facing == 0){//NORTH
-			float interval = completionTime / upNPCAnimation.size();
+		if (facing == 0) {//WEST
+			float interval = completionTime / leftNPCAnimation.size();
 			for (float i = interval; i <= completionTime; i += interval){
 				if (animationTime < i){
-					DrawSpriteSheetSprite(upNPCAnimation[index%upNPCAnimation.size()]);
+					DrawSpriteSheetSprite(leftNPCAnimation[index%leftNPCAnimation.size()]);
 					break;
 				}
 				index++;
@@ -117,26 +111,6 @@ void NPC::Draw()//Not ready yet because player is still moving too fast
 			for (float i = interval; i <= completionTime; i += interval){
 				if (animationTime < i){
 					DrawSpriteSheetSprite(rightNPCAnimation[index%rightNPCAnimation.size()]);
-					break;
-				}
-				index++;
-			}
-		}
-		else if (facing == 2) {//SOUTH
-			float interval = completionTime / downNPCAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(downNPCAnimation[index%downNPCAnimation.size()]);
-					break;
-				}
-				index++;
-			}
-		}
-		else if (facing == 3) {//WEST
-			float interval = completionTime / leftNPCAnimation.size();
-			for (float i = interval; i <= completionTime; i += interval){
-				if (animationTime < i){
-					DrawSpriteSheetSprite(leftNPCAnimation[index%leftNPCAnimation.size()]);
 					break;
 				}
 				index++;
