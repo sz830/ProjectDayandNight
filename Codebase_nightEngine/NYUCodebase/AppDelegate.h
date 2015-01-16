@@ -129,6 +129,7 @@ void AppDelegate::InitLevel1(){
 	
 	//Modify and Add Player
 	e->player = player;
+	e->smallWorldUnit = player->width / 2.f + .0001;
 
 	//Create and add NPC's
 	NPC *npc1 = new NPC(7, 7, playerID, "Luke"); // uses playerID because there is no npcID yet
@@ -157,10 +158,10 @@ void AppDelegate::UpdateLevel1(float elapsed){
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
 	//Horizontal movement
 	if (keys[SDL_SCANCODE_RIGHT]) {
-		e->moveRight();
+		e->moveRight(elapsed);
 	}
 	else if (keys[SDL_SCANCODE_LEFT]) {
-		e->moveLeft();
+		e->moveLeft(elapsed);
 	}
 	else {
 		e->stopPlayerHorizontal();
@@ -168,10 +169,10 @@ void AppDelegate::UpdateLevel1(float elapsed){
 
 	//Vertical Movement
 	if (keys[SDL_SCANCODE_DOWN]) {
-		e->moveDown();
+		e->moveDown(elapsed);
 	}
 	else if (keys[SDL_SCANCODE_UP]) {
-		e->moveUp();
+		e->moveUp(elapsed);
 	}
 	else {
 		e->stopPlayerVertical();
