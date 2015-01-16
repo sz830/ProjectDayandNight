@@ -18,11 +18,15 @@ public:
 	vector<Entity*> entities; //Objects that can be interacted with or have depth issues
 	World * world;
 	bool dayTime;
+	const float smallWorldUnit = .1f; //Used for collision detection. Not actually sure how to come up with a suitably small number.
 
 	void Render();
 	void RenderWorld();
 	void moveLeft();
 	void moveRight();
+	void stopPlayerHorizontal();
+	void stopPlayerVertical();
+	void stopPlayer();
 	bool isCollision(int gridX, int gridY);
 
 	void Update(float elapsed);
@@ -115,32 +119,51 @@ void Engine::RenderWorld(){
 	glPopMatrix();
 }
 void Engine::moveLeft(){
-	if (!player->moving){
+//	if (!player->moving){
 		player->facing = 0;//WEST
 		//Check that the grid block to the west is collision free 
 		int y = (int)player->destination->y;
-		int x = (int)player->destination->x-1;
+		int x = (int)player->destination->x - smallWorldUnit;
 		bool collision = isCollision(x, y);
-		if (!collision){
+//		if (!collision){
+/*			string debug_string = "Move left: no collision\n"; //DEBUG
+			OutputDebugString(debug_string.data()); //DEBUG*/
 			player->moving = true;
 			player->velocity->x = -player->speed;
-			player->destination->x = x;
-		}
-	}
+			string debug_string = "player->velocity->x: " + to_string(player->velocity->x) + "\n"; //DEBUG
+			OutputDebugString(debug_string.data()); //DEBUG
+//			player->destination->x = x;
+//		}
+//	}
 }
 void Engine::moveRight(){
-	if (!player->moving){
+//	if (!player->moving){
 		player->facing = 1;//EAST
 		//Check that the grid block to the east is collision free 
-		int y = (int)player->destination->y;
-		int x = (int)player->destination->x + 1;
+		int y = (int)player->position->y;
+		int x = (int)player->position->x + smallWorldUnit;
 		bool collision = isCollision(x, y);
-		if (!collision){
+//		if (!collision){
+/*			string debug_string = "Move right: no collision\n"; //DEBUG
+			OutputDebugString(debug_string.data()); //DEBUG*/
 			player->moving = true;
 			player->velocity->x = +player->speed;
-			player->destination->x = x;
-		}
-	}
+/*			string debug_string = "player->destination->x: " + to_string(player->destination->x) + "\n"; //DEBUG
+			OutputDebugString(debug_string.data()); //DEBUG*/
+//		}
+//	}
+}
+void Engine::stopPlayerHorizontal(){
+	player->velocity->x = 0;
+	player->animationTime = 0;
+	player->moving = false; //TEMPORARY
+}
+void Engine::stopPlayerVertical() {
+	player->velocity->y = 0;
+}
+void Engine::stopPlayer() {
+	stopPlayerHorizontal();
+	stopPlayerVertical();
 }
 
 bool Engine::isCollision(int gridX, int gridY){
@@ -184,6 +207,8 @@ void Engine::Update(float elapsed){
 	UpdatePlayer(elapsed);
 	//Update NPCs
 	UpdateNPCs(elapsed);
+/*	string s = to_string(player->velocity->x) + "\n"; //DEBUG
+	OutputDebugString(s.data()); //DEBUG*/
 }
 void Engine::UpdatePlayer(float elapsed){
 	if (player->moving){
@@ -193,12 +218,12 @@ void Engine::UpdatePlayer(float elapsed){
 	}
 	//Player reaches destination when animationTime > distance/velocity ; aka, we know how much time it takes him to travel one grid location
 	if (player->animationTime >= TILE_SIZE / player->speed){ 
-		int gridX = player->destination->x;
-		int gridY = player->destination->y;
+		//int gridX = player->destination->x;
+		//int gridY = player->destination->y;
 		player->animationTime = 0;
-		player->moving = false;
-		player->position = new Vector(gridToXLeft(gridX, gridY) + TILE_SIZE / 2.f, gridToYTop(gridX, gridY) - TILE_SIZE / 2.f, 0.0);
-		player->velocity = new Vector(0, 0, 0);
+		//player->moving = false;
+		//player->position = new Vector(gridToXLeft(gridX, gridY) + TILE_SIZE / 2.f, gridToYTop(gridX, gridY) - TILE_SIZE / 2.f, 0.0);
+		//player->velocity = new Vector(0, 0, 0);
 	}
 }
 
