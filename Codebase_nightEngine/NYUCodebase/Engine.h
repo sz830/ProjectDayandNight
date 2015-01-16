@@ -24,8 +24,8 @@ public:
 	void Render();
 	void RenderWorld();
 
-/*	void moveUp();
-	void moveDown();*/
+	void moveUp();
+	void moveDown();
 	void moveLeft();
 	void moveRight();
 	void stopPlayerHorizontal();
@@ -122,70 +122,66 @@ void Engine::RenderWorld(){
 	glDisable(GL_BLEND);
 	glPopMatrix();
 }
-/*void Engine::moveUp(){
-	if (!player->moving){
-		player->facing = 2;//NORTH
+void Engine::moveUp(){
+		//player->facing = 2;//NORTH
 		//Check that the grid block to the north is collision free 
-		int y = (int)player->destination->y - 1;
+		int y = (int)player->destination->y - smallWorldUnit;
 		int x = (int)player->destination->x;
 		if (!isCollision(x, y)){
-			player->moving = true;
+			player->movingY = true;
 			player->velocity->y = player->speed;
 			player->destination->y = y;
 		}
-	}
 }
-void Engine::moveDown(){\
-		player->facing = 3;//SOUTH
+void Engine::moveDown(){
+		//player->facing = 3;//SOUTH
 		//Check that the grid block to the south is collision free 
-		int y = (int)player->destination->y + 1;
+		int y = (int)player->destination->y + smallWorldUnit;
 		int x = (int)player->destination->x;
 		if (!isCollision(x, y)){
-			player->moving = true;
+			player->movingY = true;
 			player->velocity->y = -player->speed;
 			player->destination->y = y;
-		}\
-}*/
+		}
+}
 void Engine::moveLeft(){
-//	if (!player->moving){
 		player->facing = 0;//WEST
 		//Check that the grid block to the west is collision free 
 		int y = (int)player->destination->y;
 		int x = (int)player->destination->x - smallWorldUnit;
 		if (!isCollision(x, y)){
-/*			string debug_string = "Move left: no collision\n"; //DEBUG
+			/*string debug_string = "Move left: no collision\n"; //DEBUG
 			OutputDebugString(debug_string.data()); //DEBUG*/
-			player->moving = true;
+			player->movingX = true;
 			player->velocity->x = -player->speed;
 			string debug_string = "player->velocity->x: " + to_string(player->velocity->x) + "\n"; //DEBUG
 			OutputDebugString(debug_string.data()); //DEBUG
-//			player->destination->x = x;
+			//player->destination->x = x;
 		}
-//	}
 }
 void Engine::moveRight(){
-//	if (!player->moving){
 		player->facing = 1;//EAST
 		//Check that the grid block to the east is collision free 
 		int y = (int)player->position->y;
 		int x = (int)player->position->x + smallWorldUnit;
 		if (!isCollision(x, y)){
-/*			string debug_string = "Move right: no collision\n"; //DEBUG
+			/*string debug_string = "Move right: no collision\n"; //DEBUG
 			OutputDebugString(debug_string.data()); //DEBUG*/
-			player->moving = true;
+			player->movingX = true;
 			player->velocity->x = +player->speed;
-/*			string debug_string = "player->destination->x: " + to_string(player->destination->x) + "\n"; //DEBUG
+			/*string debug_string = "player->destination->x: " + to_string(player->destination->x) + "\n"; //DEBUG
 			OutputDebugString(debug_string.data()); //DEBUG*/
 		}
-//	}
 }
 void Engine::stopPlayerHorizontal(){
 	player->velocity->x = 0;
 	player->animationTime = 0;
-	player->moving = false; //TEMPORARY
+	player->movingX = false;
 }
 void Engine::stopPlayerVertical() {
 	player->velocity->y = 0;
+	//player->animationTime = 0;
+	player->movingY = false;
 }
 void Engine::stopPlayer() {
 	stopPlayerHorizontal();
@@ -241,11 +237,18 @@ void Engine::Update(float elapsed){
 	OutputDebugString(s.data()); //DEBUG*/
 }
 void Engine::UpdatePlayer(float elapsed){
-	if (player->moving){
+	if (player->movingX){
 		player->position->x += player->velocity->x*elapsed;
-		player->position->y += player->velocity->y*elapsed;
 		player->animationTime += elapsed;
 	}
+	if (player->movingY){
+		player->position->y += player->velocity->y*elapsed;
+		//player->animationTime += elapsed;
+	}
+/*	if (player->movingX && player->movingY) { //animationTime elapsed twice, so subtract one back out
+		player->animationTime -= elapsed;
+	}*/
+
 	//Player reaches destination when animationTime > distance/velocity ; aka, we know how much time it takes him to travel one grid location
 	if (player->animationTime >= TILE_SIZE / player->speed){ 
 		//int gridX = player->destination->x;

@@ -45,7 +45,8 @@ public:
 	Vector*velocity;
 	Vector*destination;
 	float speed = .5;
-	bool moving = false;
+	bool movingX = false;
+	bool movingY = false;
 	int facing; // 0=north 1=east 2=south 3=west
 	bool interacting=false;
 	GLuint textureID;
@@ -76,7 +77,7 @@ void Player::Draw()
 {
 	float completionTime = TILE_SIZE / speed;
 	int index = 0;
-	if (!moving){
+	if (!movingX){
 			 if (facing == 0) { DrawSpriteSheetSprite(leftPlayerStanding); } //LEFT
 		else if (facing == 1) { DrawSpriteSheetSprite(rightPlayerStanding); } //RIGHT
 	}
