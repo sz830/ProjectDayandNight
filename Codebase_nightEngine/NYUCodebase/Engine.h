@@ -19,9 +19,13 @@ public:
 	World * world;
 	bool dayTime;
 	const float smallWorldUnit = .1f; //Used for collision detection. Not actually sure how to come up with a suitably small number.
+	bool collisionsEnabled = false; //Enables/disables collision detection. Meant for debugging.
 
 	void Render();
 	void RenderWorld();
+
+/*	void moveUp();
+	void moveDown();*/
 	void moveLeft();
 	void moveRight();
 	void stopPlayerHorizontal();
@@ -118,14 +122,37 @@ void Engine::RenderWorld(){
 	glDisable(GL_BLEND);
 	glPopMatrix();
 }
+/*void Engine::moveUp(){
+	if (!player->moving){
+		player->facing = 2;//NORTH
+		//Check that the grid block to the north is collision free 
+		int y = (int)player->destination->y - 1;
+		int x = (int)player->destination->x;
+		if (!isCollision(x, y)){
+			player->moving = true;
+			player->velocity->y = player->speed;
+			player->destination->y = y;
+		}
+	}
+}
+void Engine::moveDown(){\
+		player->facing = 3;//SOUTH
+		//Check that the grid block to the south is collision free 
+		int y = (int)player->destination->y + 1;
+		int x = (int)player->destination->x;
+		if (!isCollision(x, y)){
+			player->moving = true;
+			player->velocity->y = -player->speed;
+			player->destination->y = y;
+		}\
+}*/
 void Engine::moveLeft(){
 //	if (!player->moving){
 		player->facing = 0;//WEST
 		//Check that the grid block to the west is collision free 
 		int y = (int)player->destination->y;
 		int x = (int)player->destination->x - smallWorldUnit;
-		bool collision = isCollision(x, y);
-//		if (!collision){
+		if (!isCollision(x, y)){
 /*			string debug_string = "Move left: no collision\n"; //DEBUG
 			OutputDebugString(debug_string.data()); //DEBUG*/
 			player->moving = true;
@@ -133,7 +160,7 @@ void Engine::moveLeft(){
 			string debug_string = "player->velocity->x: " + to_string(player->velocity->x) + "\n"; //DEBUG
 			OutputDebugString(debug_string.data()); //DEBUG
 //			player->destination->x = x;
-//		}
+		}
 //	}
 }
 void Engine::moveRight(){
@@ -142,15 +169,14 @@ void Engine::moveRight(){
 		//Check that the grid block to the east is collision free 
 		int y = (int)player->position->y;
 		int x = (int)player->position->x + smallWorldUnit;
-		bool collision = isCollision(x, y);
-//		if (!collision){
+		if (!isCollision(x, y)){
 /*			string debug_string = "Move right: no collision\n"; //DEBUG
 			OutputDebugString(debug_string.data()); //DEBUG*/
 			player->moving = true;
 			player->velocity->x = +player->speed;
 /*			string debug_string = "player->destination->x: " + to_string(player->destination->x) + "\n"; //DEBUG
 			OutputDebugString(debug_string.data()); //DEBUG*/
-//		}
+		}
 //	}
 }
 void Engine::stopPlayerHorizontal(){
@@ -167,6 +193,10 @@ void Engine::stopPlayer() {
 }
 
 bool Engine::isCollision(int gridX, int gridY){
+	if (!collisionsEnabled) {
+		return false;
+	}
+
 	if (gridY >= 0 && gridY < world->mapHeight && gridX >= 0 && gridX<world->mapWidth){ //Check if coordinates are out of bounds
 		for (int i = 0; i < world->solids.size(); i++){ // check map if new destination is a collision tile
 			if (world->levelData[gridY][gridX] == world->solids[i]){
