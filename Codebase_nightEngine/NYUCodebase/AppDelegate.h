@@ -129,7 +129,7 @@ void AppDelegate::InitLevel1(){
 	
 	//Modify and Add Player
 	e->player = player;
-	e->smallWorldUnit = player->width / 2.f + .0001;
+	player->width / 2.f + .0001;
 
 	//Create and add NPC's
 	NPC *npc1 = new NPC(7, 7, playerID, "Luke"); // uses playerID because there is no npcID yet
@@ -175,7 +175,7 @@ void AppDelegate::UpdateLevel1(float elapsed){
 		e->moveUp(elapsed);
 	}
 	else {
-		e->stopPlayerVertical();
+		//e->stopPlayerVertical();
 	}
 
 	e->Update(elapsed);

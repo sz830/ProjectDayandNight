@@ -47,6 +47,7 @@ public:
 	float speed = .5;
 	bool movingX = false;
 	bool movingY = false;
+	bool isOnPlatform = false;
 	int facing; // 0=north 1=east 2=south 3=west
 	bool interacting=false;
 	GLuint textureID;

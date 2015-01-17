@@ -15,27 +15,42 @@ public:
 	~Engine();
 	Player *player;
 	vector<NPC*> NPCs;
-	vector<Entity*> entities; //Objects that can be interacted with or have depth issues
+	vector<Entity*> entities; // Objects that can be interacted with or have depth issues
 	World * world;
 	bool dayTime;
-	float smallWorldUnit; //Used for collision detection. Not actually sure how to come up with a suitably small number.
-	bool collisionsEnabled = true; //Enables/disables collision detection. Meant for debugging.
+	#define smallWorldUnit .0001f; // Used for collision detection.
+	bool collisionsEnabled = true; // Enables/disables collision detection. Meant for debugging.
+	float gravity = -.5; // Gravity (constant acceleration) - set to 0 to disable, or positive for reverse-gravity!
+	float term_vel = -1.f; // Terminal velocity (max. downward velocity) - smaller negative value INCREASES max downward speed
+	bool flyEnabled = true; // Enables/disables moveUp()
+	float fly_power = 1.3f; // "Strength" of moveUp() function. Directly counteracts (positive) gravity
+	float fly_max = 1.5f; // Max upward speed achievable by using moveUp()
 
 	void Render();
 	void RenderWorld();
 
-	void moveUp(float elapsed);
-	void moveDown(float elapsed);
+	// These functions modify player->velocity but not player->position. player->position is handled in Update()
+	void moveUp(float elapsed); // Flying movement - can be used to stay in the air indefinitely. Mostly for debugging.
+	void jump(float elapsed);
+	void moveDown(float elapsed); //Mostly for debugging.
 	void moveLeft(float elapsed);
 	void moveRight(float elapsed);
+
 	void stopPlayerHorizontal();
 	void stopPlayerVertical();
-	void stopPlayer();
-	int isCollision(float worldX, float worldY); //Takes world coordinates as parameters, NOT tile/grid coordinates
+	void stopPlayer(); // Invokes stopPlayerHorizontal() and stopPlayerVertical()
+
+	int isCollision(float worldX, float worldY); // Takes world coordinates as parameters, NOT tile/grid coordinates
+	int collisionKeyOr(int key1, int key2); // Helper function to interpret collisionKey values of two points. See isCollision() decription.
+	void collisionCheckUp(); // Collision detection above
+	void collisionCheckDown(); // Collision detection below
+	void collisionCheckLeft(); // Collision detection to the left
+	void collisionCheckRight(); // Collision detection to the right
 
 	void Update(float elapsed);
 	void UpdatePlayer(float elapsed);
 	void UpdateNPCs(float elapsed);
+	void applyGravity(float elapsed); // Applies gravity
 
 	void addNPC(NPC* npc);
 	void addEntity(Entity* entity);
@@ -123,180 +138,53 @@ void Engine::RenderWorld(){
 	glPopMatrix();
 }
 
-/*TODO These move functions currently function as more of a "hit cross" than a "hit box".
-       Could be improved by checking the two, forward-facing corner points as opposed to just the midpoint between them.
-*/
 void Engine::moveUp(float elapsed){
+	if (flyEnabled) {
 		//player->facing = 2;//NORTH
-		//Check that the grid block to the north is collision free 
-		float y = player->position->y + smallWorldUnit;
-		float x = player->position->x;
-		if (isCollision(x, y) <= 0){ //No collision OR collisions disabled
-			/*string debug_string = "Move right: no collision\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			player->movingY = true;
-			player->velocity->y = +player->speed;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			//player->destination->x = x;
+		if (player->velocity->y < fly_max) {
+			player->velocity->y += fly_power * elapsed;
+			if (player->velocity->y > fly_max) {
+				player->velocity->y = fly_max;
+			}
 		}
-		//TODO Change based on level design/mechanics
-		// Currently places the player back on the map
-		else if (isCollision(x, y) == 1) { // Out-of-bounds
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->y = gridToYBot(gridX, gridY) - player->width / 2.f;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		else if (isCollision(x, y) == 2) { // World (solids) collisions
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->y = gridToYBot(gridX, gridY) - player->width / 2.f; // fix penetration
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
-		else if (isCollision(x, y) == 3) { // Entity collisions
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->y = gridToYBot(gridX, gridY) - player->width / 2.f; // fix penetration
-		}
-		/*//TODO NPC Collisions
-		else if (isCollision(x, y) == 4) {
-		//player->position->y =  - player->width / 2.f; // fix penetration
-		}
-		//Should never occur
-		else if (isCollision(x, y) == 5) {}*/
+			
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		//player->destination->x = x;
+	}
+}
+//TODO Implement
+void Engine::jump(float elapsed) {
+
 }
 void Engine::moveDown(float elapsed){
-		//player->facing = 3;//SOUTH
-		//Check that the grid block to the south is collision free 
-		float y = player->position->y - smallWorldUnit;
-		float x = player->position->x;
-		if (isCollision(x, y) <= 0){ //No collision OR collisions disabled
-			/*string debug_string = "Move right: no collision\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			player->movingY = true;
-			player->velocity->y = -player->speed;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			//player->destination->x = x;
+	//player->facing = 3;//SOUTH
+	if (player->velocity->y > -player->speed) { //Min downward speed
+		player->velocity->y = -player->speed;
+	}
+	if (player->velocity->y > term_vel) { // Check if current velocity is larger than term_vel
+		player->velocity->y += gravity * elapsed;
+		if (player->velocity->y < term_vel) {
+			player->velocity->y = term_vel;
 		}
-		//TODO Change based on level design/mechanics
-		// Currently places the player back on the map
-		else if (isCollision(x, y) == 1) { // Out-of-bounds
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->y = gridToYTop(gridX, gridY) + player->width / 2.f;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		else if (isCollision(x, y) == 2) { // World (solids) collisions
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->y = gridToYTop(gridX, gridY) + player->width / 2.f; // fix penetration
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
-		else if (isCollision(x, y) == 3) { // Entity collisions
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->y = gridToYTop(gridX, gridY) + player->width / 2.f; // fix penetration
-		}
-		/*//TODO NPC Collisions
-		else if (isCollision(x, y) == 4) {
-		//player->position->y =  + player->width / 2.f; // fix penetration
-		}
-		//Should never occur
-		else if (isCollision(x, y) == 5) {}*/
+	}
+	/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+	OutputDebugString(debug_string.data()); //DEBUG*/
+	//player->destination->x = x;
 }
 void Engine::moveLeft(float elapsed){
-		player->facing = 0;//WEST
-		//Check that the grid block to the west is collision free 
-		float y = player->position->y;
-		float x = player->position->x - smallWorldUnit;
-		if (isCollision(x, y) <= 0){ //No collision OR collisions disabled
-			/*string debug_string = "Move right: no collision\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			player->movingX = true;
-			player->velocity->x = -player->speed;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			//player->destination->x = x;
-		}
-		//TODO Change based on level design/mechanics
-		// Currently places the player back on the map
-		else if (isCollision(x, y) == 1) { // Out-of-bounds
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->x = gridToXRight(gridX, gridY) + player->width / 2.f;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		else if (isCollision(x, y) == 2) { // World (solids) collisions
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->x = gridToXRight(gridX, gridY) + player->width / 2.f; // fix penetration
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
-		else if (isCollision(x, y) == 3) { // Entity collisions
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->x = gridToXRight(gridX, gridY) + player->width / 2.f; // fix penetration
-		}
-		/*//TODO NPC Collisions
-		else if (isCollision(x, y) == 4) {
-		//player->position->x =  + player->width / 2.f; // fix penetration
-		}
-		//Should never occur
-		else if (isCollision(x, y) == 5) {}*/
+	player->facing = 0;//WEST
+	player->velocity->x = -player->speed;
+	/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+	OutputDebugString(debug_string.data()); //DEBUG*/
+	//player->destination->x = x;
 }
 void Engine::moveRight(float elapsed){
-		player->facing = 1;//EAST
-		//Check that the grid block to the east is collision free
-		float y = player->position->y;
-		float x = player->position->x + smallWorldUnit;
-		if (isCollision(x, y) <= 0){ //No collision OR collisions disabled
-			/*string debug_string = "Move right: no collision\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			player->movingX = true;
-			player->velocity->x = +player->speed;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			//player->destination->x = x;
-		}
-		//TODO Change based on level design/mechanics
-		// Currently places the player back on the map
-		else if (isCollision(x, y) == 1) { // Out-of-bounds
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->x = gridToXLeft(gridX, gridY) - player->width / 2.f;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		else if (isCollision(x, y) == 2) { // World (solids) collisions
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->x = gridToXLeft(gridX, gridY) - player->width / 2.f; // fix penetration
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
-		else if (isCollision(x, y) == 3) { // Entity collisions
-			int gridX, gridY;
-			worldToTileCoordinates(x, y, &gridX, &gridY);
-			player->position->x = gridToXLeft(gridX, gridY) - player->width / 2.f; // fix penetration
-		}
-		/*//TODO NPC Collisions
-		else if (isCollision(x, y) == 4) {
-			//player->position->x =  - player->width / 2.f; // fix penetration
-		}
-		//Should never occur
-		else if (isCollision(x, y) == 5) {}*/
+	player->facing = 1;//EAST
+	player->velocity->x = +player->speed;
+	/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+	OutputDebugString(debug_string.data()); //DEBUG*/
+	//player->destination->x = x;
 }
 void Engine::stopPlayerHorizontal(){
 	player->velocity->x = 0;
@@ -372,27 +260,262 @@ int Engine::isCollision(float worldX, float worldY){
 	}
 	return 0;
 }
+// Returns a collision key identical to those specified above isCollision()
+// TODO Change priority based on further collision detection implementation
+int Engine::collisionKeyOr(int key1, int key2) {
+	int returnKey = 0;
+	if (key1 == 1 || key2 == 1) {
+		returnKey = 1;
+	}
+	if (key1 == 2 || key2 == 2) {
+		returnKey = 2;
+	}
+	else if (key1 == -1 || key2 == -1) {
+		returnKey = -1;
+	}
+	/*string s = to_string(returnKey) + "\n"; //DEBUG
+	OutputDebugString(s.data()); //DEBUG*/
+	return returnKey;
+}
+void Engine::collisionCheckUp() {
+	if (flyEnabled) {
+		//player->facing = 2;//NORTH
+		//Check that the two grid blocks to the north are collision-free 
+		float y = player->position->y + (player->height / 2.f);
+		float x1 = player->position->x - (player->width / 2.f) + smallWorldUnit;
+		int collisionKey1 = isCollision(x1, y);
+		float x2 = player->position->x + (player->width / 2.f) - smallWorldUnit;
+		int collisionKey2 = isCollision(x2, y);
+		int collisionKey = collisionKeyOr(collisionKey1, collisionKey2);
+		if (collisionKey <= 0){ //No collision OR collisions disabled
+			/*string debug_string = "Move right: no collision\n"; //DEBUG
+			OutputDebugString(debug_string.data()); //DEBUG*/
+			player->movingY = true;
+
+			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+			OutputDebugString(debug_string.data()); //DEBUG*/
+			//player->destination->x = x;
+		}
+		//TODO Change based on level design/mechanics
+		// Currently places the player back on the map
+		else if (collisionKey == 1) { // Out-of-bounds
+			stopPlayerVertical();
+			int gridX, gridY;
+			worldToTileCoordinates(x1, y, &gridX, &gridY);
+			player->position->y = gridToYBot(gridX, gridY) - player->height / 2.f;
+			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+			OutputDebugString(debug_string.data()); //DEBUG*/
+		}
+		else if (collisionKey == 2) { // World (solids) collisions
+			stopPlayerVertical();
+			int gridX, gridY;
+			worldToTileCoordinates(x1, y, &gridX, &gridY);
+			player->position->y = gridToYBot(gridX, gridY) - player->height / 2.f; // fix penetration
+			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+			OutputDebugString(debug_string.data()); //DEBUG*/
+		}
+		/*//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
+		else if (collisionKey == 3) { // Entity collisions
+		stopPlayerVertical();
+		int gridX, gridY;
+		worldToTileCoordinates(x1, y, &gridX, &gridY);
+		player->position->y = gridToYBot(gridX, gridY) - player->height / 2.f; // fix penetration
+		}*/
+		/*//TODO NPC Collisions
+		else if (isCollision(x, y) == 4) {
+		//player->position->y =  - player->width / 2.f; // fix penetration
+		}
+		//Should never occur
+		else if (isCollision(x, y) == 5) {}*/
+	}
+}
+//TODO Implement + Test
+void Engine::collisionCheckDown() {
+	//Check that the two grid blocks to the south are collision-free 
+	float y = player->position->y - (player->height / 2.f);
+	float x1 = player->position->x - (player->width / 2.f) + smallWorldUnit;
+	int collisionKey1 = isCollision(x1, y);
+	float x2 = player->position->x + (player->width / 2.f) - smallWorldUnit;
+	int collisionKey2 = isCollision(x2, y);
+	int collisionKey = collisionKeyOr(collisionKey1, collisionKey2);
+	if (collisionKey <= 0){ //No collision OR collisions disabled
+		/*string debug_string = "Move right: no collision\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		player->movingY = true;
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		//player->destination->x = x;
+	}
+	//TODO Change based on level design/mechanics
+	// Currently places the player back on the map
+	else if (collisionKey == 1) { // Out-of-bounds
+		stopPlayerVertical();
+		int gridX, gridY;
+		worldToTileCoordinates(x1, y, &gridX, &gridY);
+		player->position->y = gridToYTop(gridX, gridY) + player->height / 2.f;
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+	}
+	else if (collisionKey == 2) { // World (solids) collisions
+		stopPlayerVertical();
+		int gridX, gridY;
+		worldToTileCoordinates(x1, y, &gridX, &gridY);
+		player->position->y = gridToYTop(gridX, gridY) + player->height / 2.f; // fix penetration
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+	}
+	/*//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
+	else if (collisionKey == 3) { // Entity collisions
+		int gridX, gridY;
+		worldToTileCoordinates(x1, y, &gridX, &gridY);
+		player->position->y = gridToYTop(gridX, gridY) + player->height / 2.f; // fix penetration
+	}*/
+	/*//TODO NPC Collisions
+	else if (isCollision(x, y) == 4) {
+	//player->position->y =  + player->width / 2.f; // fix penetration
+	}
+	//Should never occur
+	else if (isCollision(x, y) == 5) {}*/
+}
+void Engine::collisionCheckLeft() {
+	//Check that the two grid blocks to the west are collision-free
+	float y1 = player->position->y + (player->height / 2.f) - smallWorldUnit;
+	float x = player->position->x - (player->width / 2.f);
+	int collisionKey1 = isCollision(x, y1);
+	float y2 = player->position->y - (player->height / 2.f) + smallWorldUnit;
+	int collisionKey2 = isCollision(x, y2);
+	string s = to_string(collisionKey2) + "\n"; //DEBUG
+	OutputDebugString(s.data()); //DEBUG
+	int collisionKey = collisionKeyOr(collisionKey1, collisionKey2);
+	if (collisionKey <= 0){ //No collision OR collisions disabled
+		/*string debug_string = "Move right: no collision\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		player->movingX = true;
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		//player->destination->x = x;
+	}
+	//TODO Change based on level design/mechanics
+	// Currently places the player back on the map
+	else if (collisionKey == 1) { // Out-of-bounds
+		stopPlayerHorizontal();
+		int gridX, gridY;
+		worldToTileCoordinates(x, y1, &gridX, &gridY);
+		player->position->x = gridToXRight(gridX, gridY) + player->width / 2.f;
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+	}
+	else if (collisionKey == 2) { // World (solids) collisions
+		stopPlayerHorizontal();
+		int gridX, gridY;
+		worldToTileCoordinates(x, y1, &gridX, &gridY);
+		player->position->x = gridToXRight(gridX, gridY) + player->width / 2.f; // fix penetration
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+	}
+	/*//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
+	else if (collisionKey == 3) { // Entity collisions
+		int gridX, gridY;
+		worldToTileCoordinates(x, y1, &gridX, &gridY);
+		player->position->x = gridToXRight(gridX, gridY) + player->width / 2.f; // fix penetration
+	}*/
+	/*//TODO NPC Collisions
+	else if (isCollision(x, y) == 4) {
+	//player->position->x =  + player->width / 2.f; // fix penetration
+	}
+	//Should never occur
+	else if (isCollision(x, y) == 5) {}*/
+}
+void Engine::collisionCheckRight() {
+	//Check that the two grid blocks to the east are collision-free
+	float y1 = player->position->y + player->height / 2.f - smallWorldUnit;
+	float x = player->position->x + player->width / 2.f;
+	int collisionKey1 = isCollision(x, y1);
+	float y2 = player->position->y - player->height / 2.f + smallWorldUnit;
+	int collisionKey2 = isCollision(x, y2);
+	int collisionKey = collisionKeyOr(collisionKey1, collisionKey2);
+	if (collisionKey <= 0){ //No collision OR collisions disabled
+		/*string debug_string = "Move right: no collision\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		player->movingX = true;
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		//player->destination->x = x;
+	}
+	//TODO Change based on level design/mechanics
+	// Currently places the player back on the map
+	else if (collisionKey == 1) { // Out-of-bounds
+		stopPlayerHorizontal();
+		int gridX, gridY;
+		worldToTileCoordinates(x, y1, &gridX, &gridY);
+		player->position->x = gridToXLeft(gridX, gridY) - player->width / 2.f;
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+	}
+	else if (collisionKey == 2) { // World (solids) collisions
+		stopPlayerHorizontal();
+		int gridX, gridY;
+		worldToTileCoordinates(x, y1, &gridX, &gridY);
+		player->position->x = gridToXLeft(gridX, gridY) - player->width / 2.f; // fix penetration
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+	}
+	/*//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
+	else if (collisionKey == 3) { // Entity collisions
+		int gridX, gridY;
+		worldToTileCoordinates(x, y1, &gridX, &gridY);
+		player->position->x = gridToXLeft(gridX, gridY) - player->width / 2.f; // fix penetration
+	}*/
+	/*//TODO NPC Collisions
+	else if (isCollision(x, y) == 4) {
+	//player->position->x =  - player->width / 2.f; // fix penetration
+	}
+	//Should never occur
+	else if (isCollision(x, y) == 5) {}*/
+}
+
 
 void Engine::Update(float elapsed){
+	//Apply gravity
+	applyGravity(elapsed);
 	//Update Player
 	UpdatePlayer(elapsed);
 	//Update NPCs
 	UpdateNPCs(elapsed);
+	
+
 /*	string s = to_string(player->velocity->x) + "\n"; //DEBUG
 	OutputDebugString(s.data()); //DEBUG*/
 }
 void Engine::UpdatePlayer(float elapsed){
-	if (player->movingX){
-		player->position->x += player->velocity->x*elapsed;
-		player->animationTime += elapsed;
+	// Update player position
+	player->position->x += player->velocity->x*elapsed;
+	player->position->y += player->velocity->y*elapsed;
+
+	// Player collision detection
+	if (player->velocity->x > 0){
+		collisionCheckRight();
 	}
-	if (player->movingY){
-		player->position->y += player->velocity->y*elapsed;
-		//player->animationTime += elapsed;
+	if (player->velocity->x < 0){
+		collisionCheckLeft();
 	}
-/*	if (player->movingX && player->movingY) { //animationTime elapsed twice, so subtract one back out
-		player->animationTime -= elapsed;
-	}*/
+	if (player->velocity->y > 0) { //TEST
+		collisionCheckUp();
+	}
+	else if (player->velocity->y < 0) {
+		collisionCheckDown();
+	}
+
+	player->animationTime += elapsed;
+
+
+	/*//Update player->isOnPlatform
+	float x1 = player->position->x - (player->width / .2f);
+	float y1 = player->position->y - smallWorldUnit;
+	float x2 = player->position->x + (player->width / .2f);
+	float y2 = player->position->y - smallWorldUnit;
+	if (isCollision(x1, y1) == 2)*/
+	
 
 	//Player reaches destination when animationTime > distance/velocity ; aka, we know how much time it takes him to travel one grid location
 	if (player->animationTime >= TILE_SIZE / player->speed){ 
@@ -461,6 +584,22 @@ void Engine::UpdateNPCs(float elapsed){
 			}
 		}
 	}*/
+}
+
+void Engine::applyGravity(float elapsed) {
+	// Apply gravity to the player
+	if (gravity != 0) { // Check for non-trivial gravity value
+		if (player->velocity->y > term_vel) { // Check if current velocity is larger than term_vel
+			player->velocity->y += gravity * elapsed;
+			if (player->velocity->y < term_vel) {
+				player->velocity->y = term_vel;
+			}
+		}
+	}
+
+	/*// TODO NPC gravity
+	// Apply gravity to NPCs
+	*/
 }
 
 void Engine::addNPC(NPC* npc){
