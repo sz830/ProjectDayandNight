@@ -45,6 +45,7 @@ public:
 	Vector*velocity;
 	Vector*destination;
 	float speed = .5;
+	float jumpSpeed = .5; // Initial vertical velocity after a jump
 	bool movingX = false;
 	bool movingY = false;
 	bool isOnPlatform = false;

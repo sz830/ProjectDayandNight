@@ -153,9 +153,10 @@ void Engine::moveUp(float elapsed){
 		//player->destination->x = x;
 	}
 }
-//TODO Implement
 void Engine::jump(float elapsed) {
-
+	if (player->isOnPlatform) {
+		player->velocity->y = +player->jumpSpeed;
+	}
 }
 void Engine::moveDown(float elapsed){
 	//player->facing = 3;//SOUTH
@@ -278,56 +279,54 @@ int Engine::collisionKeyOr(int key1, int key2) {
 	return returnKey;
 }
 void Engine::collisionCheckUp() {
-	if (flyEnabled) {
-		//player->facing = 2;//NORTH
-		//Check that the two grid blocks to the north are collision-free 
-		float y = player->position->y + (player->height / 2.f);
-		float x1 = player->position->x - (player->width / 2.f) + smallWorldUnit;
-		int collisionKey1 = isCollision(x1, y);
-		float x2 = player->position->x + (player->width / 2.f) - smallWorldUnit;
-		int collisionKey2 = isCollision(x2, y);
-		int collisionKey = collisionKeyOr(collisionKey1, collisionKey2);
-		if (collisionKey <= 0){ //No collision OR collisions disabled
-			/*string debug_string = "Move right: no collision\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			player->movingY = true;
-
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-			//player->destination->x = x;
-		}
-		//TODO Change based on level design/mechanics
-		// Currently places the player back on the map
-		else if (collisionKey == 1) { // Out-of-bounds
-			stopPlayerVertical();
-			int gridX, gridY;
-			worldToTileCoordinates(x1, y, &gridX, &gridY);
-			player->position->y = gridToYBot(gridX, gridY) - player->height / 2.f;
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		else if (collisionKey == 2) { // World (solids) collisions
-			stopPlayerVertical();
-			int gridX, gridY;
-			worldToTileCoordinates(x1, y, &gridX, &gridY);
-			player->position->y = gridToYBot(gridX, gridY) - player->height / 2.f; // fix penetration
-			/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
-			OutputDebugString(debug_string.data()); //DEBUG*/
-		}
-		/*//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
-		else if (collisionKey == 3) { // Entity collisions
+	//player->facing = 2;//NORTH
+	//Check that the two grid blocks to the north are collision-free 
+	float y = player->position->y + (player->height / 2.f);
+	float x1 = player->position->x - (player->width / 2.f) + smallWorldUnit;
+	int collisionKey1 = isCollision(x1, y);
+	float x2 = player->position->x + (player->width / 2.f) - smallWorldUnit;
+	int collisionKey2 = isCollision(x2, y);
+	int collisionKey = collisionKeyOr(collisionKey1, collisionKey2);
+	if (collisionKey <= 0){ //No collision OR collisions disabled
+		/*string debug_string = "Move right: no collision\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		player->movingY = true;
+		player->isOnPlatform = false; // Player is not standing on a platform
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+		//player->destination->x = x;
+	}
+	//TODO Change based on level design/mechanics
+	// Currently places the player back on the map
+	else if (collisionKey == 1) { // Out-of-bounds
+		stopPlayerVertical();
+		int gridX, gridY;
+		worldToTileCoordinates(x1, y, &gridX, &gridY);
+		player->position->y = gridToYBot(gridX, gridY) - player->height / 2.f;
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
+	}
+	else if (collisionKey == 2) { // World (solids) collisions
 		stopPlayerVertical();
 		int gridX, gridY;
 		worldToTileCoordinates(x1, y, &gridX, &gridY);
 		player->position->y = gridToYBot(gridX, gridY) - player->height / 2.f; // fix penetration
-		}*/
-		/*//TODO NPC Collisions
-		else if (isCollision(x, y) == 4) {
-		//player->position->y =  - player->width / 2.f; // fix penetration
-		}
-		//Should never occur
-		else if (isCollision(x, y) == 5) {}*/
+		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
+		OutputDebugString(debug_string.data()); //DEBUG*/
 	}
+	/*//TODO should match above block if entities stays as grid coordinates, or below block if changed to world coordinates
+	else if (collisionKey == 3) { // Entity collisions
+	stopPlayerVertical();
+	int gridX, gridY;
+	worldToTileCoordinates(x1, y, &gridX, &gridY);
+	player->position->y = gridToYBot(gridX, gridY) - player->height / 2.f; // fix penetration
+	}*/
+	/*//TODO NPC Collisions
+	else if (isCollision(x, y) == 4) {
+	//player->position->y =  - player->width / 2.f; // fix penetration
+	}
+	//Should never occur
+	else if (isCollision(x, y) == 5) {}*/
 }
 //TODO Implement + Test
 void Engine::collisionCheckDown() {
@@ -341,7 +340,8 @@ void Engine::collisionCheckDown() {
 	if (collisionKey <= 0){ //No collision OR collisions disabled
 		/*string debug_string = "Move right: no collision\n"; //DEBUG
 		OutputDebugString(debug_string.data()); //DEBUG*/
-		player->movingY = true;
+		player->movingY = true; // Player is falling downwards
+		player->isOnPlatform = false; // Player is not standing on a platform
 		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
 		OutputDebugString(debug_string.data()); //DEBUG*/
 		//player->destination->x = x;
@@ -353,6 +353,7 @@ void Engine::collisionCheckDown() {
 		int gridX, gridY;
 		worldToTileCoordinates(x1, y, &gridX, &gridY);
 		player->position->y = gridToYTop(gridX, gridY) + player->height / 2.f;
+		player->isOnPlatform = false; // Player is not standing on a platform
 		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
 		OutputDebugString(debug_string.data()); //DEBUG*/
 	}
@@ -361,6 +362,7 @@ void Engine::collisionCheckDown() {
 		int gridX, gridY;
 		worldToTileCoordinates(x1, y, &gridX, &gridY);
 		player->position->y = gridToYTop(gridX, gridY) + player->height / 2.f; // fix penetration
+		player->isOnPlatform = true; // Player is standing on a platform
 		/*string debug_string = "player->position->x: " + to_string(player->position->x) + "\n"; //DEBUG
 		OutputDebugString(debug_string.data()); //DEBUG*/
 	}
@@ -384,8 +386,8 @@ void Engine::collisionCheckLeft() {
 	int collisionKey1 = isCollision(x, y1);
 	float y2 = player->position->y - (player->height / 2.f) + smallWorldUnit;
 	int collisionKey2 = isCollision(x, y2);
-	string s = to_string(collisionKey2) + "\n"; //DEBUG
-	OutputDebugString(s.data()); //DEBUG
+	/*string s = to_string(collisionKey2) + "\n"; //DEBUG
+	OutputDebugString(s.data()); //DEBUG*/
 	int collisionKey = collisionKeyOr(collisionKey1, collisionKey2);
 	if (collisionKey <= 0){ //No collision OR collisions disabled
 		/*string debug_string = "Move right: no collision\n"; //DEBUG

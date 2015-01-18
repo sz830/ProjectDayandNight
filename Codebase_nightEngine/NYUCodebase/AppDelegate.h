@@ -157,13 +157,13 @@ void AppDelegate::UpdateLevel1(float elapsed){
 	}
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
 	//Horizontal movement
+	if (keys[SDL_SCANCODE_LEFT]) {
+		e->moveLeft(elapsed);
+	}
 	if (keys[SDL_SCANCODE_RIGHT]) {
 		e->moveRight(elapsed);
 	}
-	else if (keys[SDL_SCANCODE_LEFT]) {
-		e->moveLeft(elapsed);
-	}
-	else {
+	if (!keys[SDL_SCANCODE_LEFT] && !keys[SDL_SCANCODE_RIGHT]){
 		e->stopPlayerHorizontal();
 	}
 
@@ -171,12 +171,15 @@ void AppDelegate::UpdateLevel1(float elapsed){
 	if (keys[SDL_SCANCODE_DOWN]) {
 		e->moveDown(elapsed);
 	}
-	else if (keys[SDL_SCANCODE_UP]) {
+	if (keys[SDL_SCANCODE_SPACE]) {
+		e->jump(elapsed);
+	}
+	if (keys[SDL_SCANCODE_UP]) {
 		e->moveUp(elapsed);
 	}
-	else {
-		//e->stopPlayerVertical();
-	}
+	/*else {
+		e->stopPlayerVertical();
+	}*/
 
 	e->Update(elapsed);
 }
