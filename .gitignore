@@ -1,0 +1,28 @@
+# Created by https://www.gitignore.io
+
+### VisualStudio ###
+# Build results
+[Dd]ebug/
+[Rr]elease/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual C++ cache files
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+
+*.ilk
+*.pdb
+
+### C++ ###
+# Executables
+*.exe
+*.out
+*.app
