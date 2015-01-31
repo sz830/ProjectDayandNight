@@ -33,10 +33,10 @@ float gridToXRight(int x, int y)
 }
 
 #pragma once
-#include <SDL.h>
-#include <SDL_opengl.h>
-#include <SDL_image.h>
-#include <SDL_mixer.h>
+#include "SDL\SDL.h"
+#include "SDL\SDL_opengl.h"
+#include "SDL\SDL_image.h"
+#include "SDL\SDL_mixer.h"
 #include <vector>
 #include <cstdlib>
 #include <fstream>
